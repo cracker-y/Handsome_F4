@@ -1,8 +1,9 @@
-from config import db
-from flask import Flask
+from flask import Flask, jsonify
 from flask_migrate import Migrate
 
 import app.models
+from app.routes import routes
+from config import db
 
 migrate = Migrate()
 
@@ -17,6 +18,14 @@ def create_app():
 
     migrate.init_app(application, db)
 
-    # 이어서 블루 프린트 등록 코드를 작성해주세요!
+    # 400 에러 발생 시, JSON 형태로 응답 반환
+    @application.errorhandler(400)
+    def handle_bad_request(error):
+        response = jsonify({"message": error.description})
+        response.status_code = 400
+        return response
+
+    # 블루프린트 등록
+    application.register_blueprint(routes)
 
     return application
