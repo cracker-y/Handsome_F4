@@ -28,7 +28,13 @@ class ImageView(MethodView):
 
     def post(self):
         data = request.json
-        image = Image(url=data["url"], type=data["type"])
+        image = app.models.Image(
+            id=data["id"],
+            url=data["url"],
+            type=data["type"],
+            created_at=data["created_at"],
+            updated_at=data["updated_at"],
+        )
         db.session.add(image)
         db.session.commit()
         return jsonify({"message": "Image created successfully"})
