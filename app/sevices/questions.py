@@ -14,18 +14,7 @@ question_blp = Blueprint(
 class QuestionView(MethodView):
     def get(self):
         questions = app.models.Question.query.all()
-        questions_data = [
-            {
-                "id": question.id,
-                "title": question.title,
-                "is_active": question.is_active,
-                "sqe": question.sqe,
-                "image": question.image.to_dict() if question.image else None,
-                "created_at": question.created_at.isoformat(),
-                "updated_at": question.updated_at.isoformat(),
-            }
-            for question in questions
-        ]
+        questions_data = [question.to_dict() for question in questions]
         return jsonify(questions_data)
 
     def post(self):
@@ -59,4 +48,3 @@ class QuestionView(MethodView):
             question = app.models.Question.query.get(question_id)
             db.session.delete(question)
         return jsonify({"message": "Question deleted successfully"})
-    

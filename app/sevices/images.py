@@ -14,16 +14,7 @@ image_blp = Blueprint(
 class ImageView(MethodView):
     def get(self):
         images = app.models.Image.query.all()
-        images_data = [
-            {
-                "id": image.id,
-                "url": image.url,
-                "type": image.type,
-                "created_at": image.created_at,
-                "updated_at": image.updated_at,
-            }
-            for image in images
-        ]
+        images_data = [image.to_dict() for image in images]
         return jsonify(images_data)
 
     def post(self):
