@@ -28,13 +28,39 @@ class ImageView(MethodView):
 
     def post(self):
         data = request.json
-        image = app.models.Image(
-            id=data["id"],
-            url=data["url"],
-            type=data["type"],
-            created_at=data["created_at"],
-            updated_at=data["updated_at"],
-        )
-        db.session.add(image)
-        db.session.commit()
+        with db.session.begin():
+            image = app.models.Image(
+                url=data["url"],
+                type=data["type"],
+            )
+            db.session.add(image)
         return jsonify({"message": "Image created successfully"})
+
+
+@image_blp.route("/<int:image_id>")
+class ImageView(MethodView):
+    def get(self, image_id):
+        image = app.models.Image.query.get(image_id)
+        if not image:
+            return jsonify({"message": "Image not found"}), 404
+        return jsonify(image.to_dict())
+
+    def put(self, image_id):
+        image = app.models.Image.query.get(image_id)
+        if not image:
+            return jsonify({"message": "Image not found"}), 404
+
+        data = request.json
+        image.url = data["url"]
+        image.type = data["type"]
+        db.session.commit()
+        return jsonify({"message": "Image updated successfully"})
+
+    def delete(self, image_id):
+        image = app.models.Image.query.get(image_id)
+        if not image:
+            return jsonify({"message": "Image not found"}), 404
+
+        db.session.delete(image)
+        db.session.commit()
+        return jsonify({"message": "Image deleted successfully"})

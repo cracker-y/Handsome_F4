@@ -39,3 +39,24 @@ class QuestionView(MethodView):
         db.session.add(question)
         db.session.commit()
         return jsonify({"message": "Question created successfully"})
+
+
+@question_blp.route("/<int:question_id>")
+class QuestionView(MethodView):
+    def get(self, question_id):
+        question = app.models.Question.query.get(question_id)
+        return jsonify(question.to_dict())
+
+    def put(self, question_id):
+        data = request.json
+        with db.session.begin():
+            question = app.models.Question.query.get(question_id)
+            question.title = data["title"]
+            question.is_active = data["is_active"]
+
+    def delete(self, question_id):
+        with db.session.begin():
+            question = app.models.Question.query.get(question_id)
+            db.session.delete(question)
+        return jsonify({"message": "Question deleted successfully"})
+    
