@@ -6,6 +6,7 @@ from config import db
 
 KST = ZoneInfo("Asia/Seoul")
 
+
 class CommonModel(db.Model):
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
@@ -13,8 +14,10 @@ class CommonModel(db.Model):
         db.DateTime, default=lambda: datetime.now(tz=KST), nullable=False
     )
     updated_at = db.Column(
-        db.DateTime, default=lambda: datetime.now(tz=KST),
-        onupdate=lambda: datetime.now(tz=KST), nullable=False
+        db.DateTime,
+        default=lambda: datetime.now(tz=KST),
+        onupdate=lambda: datetime.now(tz=KST),
+        nullable=False,
     )
 
 
@@ -96,7 +99,7 @@ class Question(CommonModel):
         }
 
 
-class Choices(CommonModel):
+class Choice(CommonModel):
     __tablename__ = "choices"
     content = db.Column(db.Text, nullable=False)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
