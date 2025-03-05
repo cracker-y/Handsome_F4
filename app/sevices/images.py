@@ -55,3 +55,5 @@ class ImageView(MethodView):
         db.session.delete(image)
         db.session.commit()
         return jsonify({"message": "Image deleted successfully"})
+
+

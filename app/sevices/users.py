@@ -39,6 +39,10 @@ class UserView(MethodView):
                 email=data["email"],
             )
             db.session.add(user)
+            # if user in self.get():
+            #     return jsonify(
+            #         {"message": "User님 회원가입을 축하합니다", "user_id": user.to_dict()["id"]}
+            #     )
         return jsonify(
             {"message": "User님 회원가입을 축하합니다", "user_id": user.to_dict()["id"]}
         )
