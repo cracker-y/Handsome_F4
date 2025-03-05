@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 import app.models
 
 # from app.routes import routes
-from app.sevices import images, users, questions
+from app.sevices import images, users, questions, choices, answers
 from config import db
 from flask_smorest import Api
 
@@ -45,6 +45,10 @@ def create_app():
     api.register_blueprint(images.image_blp)
     api.register_blueprint(users.user_blp)
     api.register_blueprint(questions.question_blp)
+    api.register_blueprint(choices.choice_blp)
+    api.register_blueprint(answers.answer_blp)
+
+
     with application.app_context():
         db.create_all()
 

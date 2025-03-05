@@ -99,7 +99,7 @@ class Question(CommonModel):
         }
 
 
-class Choices(CommonModel):
+class Choice(CommonModel):
     __tablename__ = "choices"
     content = db.Column(db.Text, nullable=False)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
