@@ -5,19 +5,6 @@ from config import db
 import app.models
 
 
-# def to_dict(self):
-#         return {
-#             "id": self.id,
-#             "name": self.name,
-#             "age": self.age.value if hasattr(self.age, "value") else self.age,
-#             "gender": (
-#                 self.gender.value if hasattr(self.gender, "value") else self.gender
-#             ),
-#             "email": self.email,
-#             "created_at": self.created_at.isoformat(),
-#             "updated_at": self.updated_at.isoformat(),
-#         }
-
 user_blp = Blueprint(
     "Users", __name__, description="Operations on users", url_prefix="/user"
 )
@@ -27,25 +14,60 @@ user_blp = Blueprint(
 class UserView(MethodView):
     def get(self):
         users = app.models.User.query.all()
-        users_data = [
-            {
-                "name": user.name,
-                "age": user.age,
-                "gender": user.gender,
-                "email": user.email,
-            }
-            for user in users
-        ]
+        # users_data = [
+        #     {
+        #         "id": user.id,
+        #         "name": user.name,
+        #         "age": user.age,
+        #         "gender": user.gender,
+        #         "email": user.email,
+        #         "created_at": user.created_at,
+        #         "updated_at": user.updated_at,
+        #     }
+        #     for user in users
+        # ]
+        users_data = [user.to_dict() for user in users]
         return jsonify(users_data)
 
     def post(self):
         data = request.json
         with db.session.begin():
             user = app.models.User(
-            name=data["name"],
-            age=data["age"],
-            gender=data["gender"],
-            email=data["email"],
+                name=data["name"],
+                age=data["age"],
+                gender=data["gender"],
+                email=data["email"],
             )
             db.session.add(user)
         return jsonify({"message": "User created successfully"})
+
+
+@user_blp.route("/<int:user_id>")
+class UserView(MethodView):
+    def get(self, user_id):
+        user = app.models.User.query.get(user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+        return jsonify(user.to_dict())
+
+    def put(self, user_id):
+        user = app.models.User.query.get(user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        data = request.json
+        user.name = data["name"]
+        user.age = data["age"]
+        user.gender = data["gender"]
+        user.email = data["email"]
+        db.session.commit()
+        return jsonify({"message": "User updated successfully"})
+
+    def delete(self, user_id):
+        user = app.models.User.query.get(user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully"})
