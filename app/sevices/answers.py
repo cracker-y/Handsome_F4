@@ -23,25 +23,58 @@ class AnswerList(MethodView):
 
     # 새로운 답변 생성
     def post(self):
-        data = request.json
-        user_id = data.get("user_id")
-        choice_id = data.get("choice_id")
+        datas = request.json
+        
 
-        # 필수 필드 검증
-        if not user_id or not choice_id:
-            return jsonify({"message": "user_id와 choice_id가 필요합니다."}), 400
+        if not isinstance(datas, list):
+            user_id = datas["user_id"]
+            choice_id = datas["choice_id"]
 
-        # 새로운 answers 객체 생성
-        answer = app.models.Answer(
-            user_id=user_id,
-            choice_id=choice_id,
-        )
-        # 데이터베이스에 객체 추가, 커밋
-        db.session.add(answer)
-        db.session.commit()
+            print("--------------------------------")
+            print(user_id, choice_id)
+            print("--------------------------------")
+            answers = app.models.Answer(user_id=user_id, choice_id=choice_id)
+
+            db.session.add(answers)
+            db.session.commit()
+        else:
+            # 필수 필드 검증
+            # if not user_id or not choice_id:
+            #     return jsonify({"message": "user_id와 choice_id가 필요합니다."}), 400
+
+            # 새로운 answers 객체 생성
+            # answer = app.models.Answer(
+            #     [
+            #         {
+            #             "user_id": data["user_id"],
+            #             "choice_id": data["choice_id"],
+            #         }
+            #         for data in data["answers"]
+            #     ]
+            # )
+            answers = []
+            for data in datas:
+                user_id = data["user_id"]
+                choice_id = data["choice_id"]
+                print(user_id, choice_id)
+
+                if not user_id or not choice_id:
+                    return (
+                        jsonify({"message": "user_id와 choice_id가 필요합니다."}),
+                        400,
+                    )
+
+                answers.append(app.models.Answer(user_id=user_id, choice_id=choice_id))
+
+            # 데이터베이스에 객체 추가, 커밋
+            # db.session.add(answer)
+            db.session.bulk_save_objects(answers)
+
+            db.session.commit()
 
         # 성공 메세지 반환
         return jsonify({"message": "답변이 성공적으로 생성되었습니다."}), 201
+
 
 # 답변 상세 조회, 수정, 삭제
 @answer_blp.route("/<int:answer_id>")
@@ -54,7 +87,7 @@ class AnswerView(MethodView):
             return jsonify({"message": "답변을 찾을 수 없습니다."}), 404
         # 답변 데이터 json 형식으로 반환
         return jsonify(answer.to_dict())
-    
+
     # 답변 수정
     def put(self, answer_id):
         # 답변 조회
@@ -62,7 +95,7 @@ class AnswerView(MethodView):
         # 답변이 존재하지 않으면 404 오류 반환
         if not answer:
             return jsonify({"message": "답변을 찾을 수 없습니다."}), 404
-        
+
         # 요청 데이터 추출
         data = request.json
         # 요청 데이터에서 choice_id 추출
@@ -71,7 +104,7 @@ class AnswerView(MethodView):
         db.session.commit()
         # 성공 메세지 반환
         return jsonify({"message": "답변이 성공적으로 수정되었습니다."})
-    
+
     # 답변 삭제
     def delete(self, answer_id):
         # 답변 조회
